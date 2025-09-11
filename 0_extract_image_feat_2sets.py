@@ -5,7 +5,6 @@ import os
 os.environ['CUDA_VISIBLE_DEVICES'] = '0' # debug
 # import sys
 # sys.path.append('./')
-# import shortuuid
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -19,12 +18,9 @@ import numpy as np
 import pandas as pd
 from abnormality_list import abnormality_list
 import monai
-# from monai.metrics import ROCAUCMetric
-# from monai.data import set_track_meta
 from sklearn.metrics import roc_auc_score
 import torchvision
 from models import i3res
-# from eval_path import project_root, answer_path, model_path, model_root, data_root, text_path, data_path
 from monai.transforms import (
     EnsureChannelFirstd,
     Compose,
@@ -127,7 +123,6 @@ train_transform = mtf.Compose(
             ScaleIntensityRanged(
                 keys=["image", ], a_min=-1000, a_max=1000, b_min=0.0, b_max=1.0, clip=True
             ),
-            # mtf.CropForegroundd(keys=["image", ], source_key='mask', allow_smaller=True, margin=60),
             SpatialPadd(keys=["image", ], spatial_size=[224, 224, 160]),
             CenterSpatialCropd(
                 roi_size=[224, 224, 160],
@@ -168,7 +163,6 @@ class ImageClassifier(torch.nn.Module):
         
     def forward(self, image):
         contrastive_features, ehr_features, skips, pooled_feat = self.i3_resnet(image)
-        # out = F.sigmoid(ehr_features)
         return skips, pooled_feat
 
 
@@ -203,8 +197,7 @@ def run_model(args):
             labels = batch_data['label'].float().cuda()
             with torch.autocast(device_type="cuda", dtype=torch.float16):
                 skips, pooled_feat = model(images) # 2048 1024
-                # outputs = torch.sigmoid(outputs)
-                # feat_arrs = torch.squeeze(pooled_feat).as_tensor().detach().cpu().numpy()
+                
                 if mode == 'train':
                     save_size = int(max(1, min(BATCHSIZE, labels[0].sum()) ))
                 else:
