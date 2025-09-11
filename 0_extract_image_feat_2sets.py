@@ -134,9 +134,6 @@ train_transform = mtf.Compose(
                 keys=["image", ],
             ),
             mtf.RandRotate90d(keys=["image", ],prob=0.9, spatial_axes=(0, 1)),
-            # mtf.RandFlipd(keys=["image", ],prob=0.10, spatial_axis=0),
-            # mtf.RandFlipd(keys=["image", ],prob=0.10, spatial_axis=1),
-            # mtf.RandFlipd(keys=["image", ],prob=0.10, spatial_axis=2),
             mtf.RandScaleIntensityd(keys=["image"],factors=0.1, prob=0.9),
             mtf.RandShiftIntensityd(keys=["image"],offsets=0.1, prob=0.9),
             mtf.ToTensord(keys=["image", ], dtype=torch.float),
@@ -151,7 +148,6 @@ val_transform = mtf.Compose(
             ScaleIntensityRanged(
                 keys=["image", ], a_min=-1000, a_max=1000, b_min=0.0, b_max=1.0, clip=True
             ),
-            # mtf.CropForegroundd(keys=["image", ], source_key='mask', allow_smaller=True, margin=60),
             SpatialPadd(keys=["image", ], spatial_size=[224, 224, 160]),
             CenterSpatialCropd(
                 roi_size=[224, 224, 160],
@@ -176,39 +172,20 @@ class ImageClassifier(torch.nn.Module):
         return skips, pooled_feat
 
 
-def train_classify_model(args):
+def run_model(args):
     train_root = './exps_2sets/i3dResnet_ASL_mean_sampler_2/'+ args.abn_name + '/'
     feat_root = '/media/brownradx/ssd_data0/PE_datas/PE_vlm_data' + '/image_multiscale_feat'
-    # train_root = './exps/i3dResnet_nofix_ASL/'+ args.abn_name + '/'
-    # train_root = './exps_2sets/i3dResnet_ASL_mean_sampler/'+ args.abn_name + '/'
     checkpoint_path = train_root + "/checkpoint/best_metric_model_classification3d_dict.pth"
-    # checkpoint_path = train_root + "/checkpoint/final_model_classification3d_dict.pth"
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
-    # torch.set_default_device(device)
-    
-    # mode='train' # with augmentation
-    # BATCHSIZE = 10
-    # test_list = ImgABNDataset(args, mode)
-    # test_list_repeat = [val for val in test_list for i in range(BATCHSIZE)]
-    # # target = torch.tensor(np.concatenate([np.array(a['label'])[None] for a in test_list], axis=0)[:,5].astype(int))
-    # test_data = monai.data.Dataset(data=test_list_repeat, transform=train_transform)
     
     BATCHSIZE = 1
     mode = 'train_noA' # no augmentation
     feat_root = feat_root + '_' + mode
     test_list = ImgABNDataset(args, mode='train') 
     test_data = monai.data.Dataset(data=test_list, transform=val_transform)
-    # test_list = ImgABNDataset(args, mode='test')
-    # test_data = monai.data.Dataset(data=test_list, transform=val_transform)
-    # test_list = ImgABNDataset(args, mode='validation')
-    # test_data = monai.data.Dataset(data=test_list, transform=val_transform)
         
     test_loader = DataLoader(test_data, batch_size=BATCHSIZE, shuffle=False, num_workers=10)
     model = ImageClassifier(args, out_channels=len(abnormality_list))
-    # spatial_dims=3
-    # in_channels=1
-    # out_channels=2
-    # model = monai.networks.nets.resnet50(spatial_dims=spatial_dims, n_input_channels=in_channels, num_classes=out_channels, feed_forward=True).to('cuda')
     model_weights = torch.load(checkpoint_path)
     model = model.to(device, non_blocking=True)
     print(model.load_state_dict(model_weights))
@@ -277,5 +254,4 @@ if __name__ == "__main__":
     parser.add_argument("--data_path", type=str, default=data_path)
     parser.add_argument("--text_path", type=str, default=text_path)
     args = parser.parse_args()
-    # abnormality_list = [args.abn_name]
-    train_classify_model(args)
+    run_model(args)
