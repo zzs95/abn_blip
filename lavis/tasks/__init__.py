@@ -7,16 +7,7 @@
 
 from lavis.common.registry import registry
 from lavis.tasks.base_task import BaseTask
-from lavis.tasks.captioning import CaptionTask
 from lavis.tasks.image_text_pretrain import ImageTextPretrainTask
-from lavis.tasks.multimodal_classification import (
-    MultimodalClassificationTask,
-)
-from lavis.tasks.retrieval import RetrievalTask
-from lavis.tasks.vqa import VQATask, GQATask, AOKVQATask, DisCRNTask
-from lavis.tasks.vqa_reading_comprehension import VQARCTask, GQARCTask
-from lavis.tasks.dialogue import DialogueTask
-from lavis.tasks.text_to_image_generation import TextToImageGenerationTask
 
 
 def setup_task(cfg):
@@ -31,18 +22,18 @@ def setup_task(cfg):
 
 __all__ = [
     "BaseTask",
-    "AOKVQATask",
-    "RetrievalTask",
-    "CaptionTask",
-    "VQATask",
-    "GQATask",
-    "VQARCTask",
-    "GQARCTask",
-    "MultimodalClassificationTask",
+    # "AOKVQATask",
+    # "RetrievalTask",
+    # "CaptionTask",
+    # "VQATask",
+    # "GQATask",
+    # "VQARCTask",
+    # "GQARCTask",
+    # "MultimodalClassificationTask",
     # "VideoQATask",
     # "VisualEntailmentTask",
     "ImageTextPretrainTask",
-    "DialogueTask",
-    "TextToImageGenerationTask",
-    "DisCRNTask"
+    # "DialogueTask",
+    # "TextToImageGenerationTask",
+    # "DisCRNTask"
 ]
